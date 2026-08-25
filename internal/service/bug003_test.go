@@ -1,0 +1,3 @@
+package service
+import("testing";"ratelimiter/internal/config";"ratelimiter/internal/model";"ratelimiter/internal/store";"ratelimiter/pkg/logger")
+func TestClientUpdateConflictKeepsStoredClient(t *testing.T){s:=New(store.NewMemoryStore(),logger.NewLevel(logger.LevelError),&config.Config{MaxPageSize:100});a,_:=s.CreateClient(model.Client{AppID:"a",Name:"A"});b,_:=s.CreateClient(model.Client{AppID:"b",Name:"B"});_,e:=s.UpdateClient(b.ID,model.Client{AppID:"a",Name:"changed"});if e==nil{t.Fatal("expected conflict")};got,_:=s.GetClient(b.ID);if got.AppID!="b"||got.Name!="B"{t.Fatalf("conflict changed stored client: %#v",got)};_ = a}
