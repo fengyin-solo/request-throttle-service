@@ -18,7 +18,8 @@ func (s *MemoryStore) GetAccessRecord(id string) (*model.AccessRecord, error) {
 	if !ok {
 		return nil, ErrNotFound
 	}
-	return a, nil
+	cp := *a
+	return &cp, nil
 }
 
 func (s *MemoryStore) ListAccessRecords() []*model.AccessRecord {
@@ -26,7 +27,8 @@ func (s *MemoryStore) ListAccessRecords() []*model.AccessRecord {
 	defer s.mu.RUnlock()
 	list := make([]*model.AccessRecord, 0, len(s.accessRecords))
 	for _, a := range s.accessRecords {
-		list = append(list, a)
+		cp := *a
+		list = append(list, &cp)
 	}
 	return list
 }

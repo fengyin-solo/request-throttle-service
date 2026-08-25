@@ -23,7 +23,8 @@ func (s *MemoryStore) GetRule(id string) (*model.Rule, error) {
 	if !ok {
 		return nil, ErrNotFound
 	}
-	return r, nil
+	cp := *r
+	return &cp, nil
 }
 
 func (s *MemoryStore) GetRuleByKey(key string) (*model.Rule, error) {
@@ -31,7 +32,8 @@ func (s *MemoryStore) GetRuleByKey(key string) (*model.Rule, error) {
 	defer s.mu.RUnlock()
 	for _, r := range s.rules {
 		if r.Key == key {
-			return r, nil
+			cp := *r
+			return &cp, nil
 		}
 	}
 	return nil, ErrNotFound
@@ -42,7 +44,8 @@ func (s *MemoryStore) ListRules() []*model.Rule {
 	defer s.mu.RUnlock()
 	list := make([]*model.Rule, 0, len(s.rules))
 	for _, r := range s.rules {
-		list = append(list, r)
+		cp := *r
+		list = append(list, &cp)
 	}
 	return list
 }

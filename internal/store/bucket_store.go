@@ -23,7 +23,8 @@ func (s *MemoryStore) GetBucket(id string) (*model.Bucket, error) {
 	if !ok {
 		return nil, ErrNotFound
 	}
-	return b, nil
+	cp := *b
+	return &cp, nil
 }
 
 func (s *MemoryStore) GetBucketByClientRule(clientID, ruleID string) (*model.Bucket, error) {
@@ -31,7 +32,8 @@ func (s *MemoryStore) GetBucketByClientRule(clientID, ruleID string) (*model.Buc
 	defer s.mu.RUnlock()
 	for _, b := range s.buckets {
 		if b.ClientID == clientID && b.RuleID == ruleID {
-			return b, nil
+			cp := *b
+			return &cp, nil
 		}
 	}
 	return nil, ErrNotFound
@@ -42,7 +44,8 @@ func (s *MemoryStore) ListBuckets() []*model.Bucket {
 	defer s.mu.RUnlock()
 	list := make([]*model.Bucket, 0, len(s.buckets))
 	for _, b := range s.buckets {
-		list = append(list, b)
+		cp := *b
+		list = append(list, &cp)
 	}
 	return list
 }

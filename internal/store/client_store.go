@@ -23,7 +23,8 @@ func (s *MemoryStore) GetClient(id string) (*model.Client, error) {
 	if !ok {
 		return nil, ErrNotFound
 	}
-	return c, nil
+	cp := *c
+	return &cp, nil
 }
 
 func (s *MemoryStore) GetClientByAppID(appID string) (*model.Client, error) {
@@ -31,7 +32,8 @@ func (s *MemoryStore) GetClientByAppID(appID string) (*model.Client, error) {
 	defer s.mu.RUnlock()
 	for _, c := range s.clients {
 		if c.AppID == appID {
-			return c, nil
+			cp := *c
+			return &cp, nil
 		}
 	}
 	return nil, ErrNotFound
@@ -42,7 +44,8 @@ func (s *MemoryStore) ListClients() []*model.Client {
 	defer s.mu.RUnlock()
 	list := make([]*model.Client, 0, len(s.clients))
 	for _, c := range s.clients {
-		list = append(list, c)
+		cp := *c
+		list = append(list, &cp)
 	}
 	return list
 }

@@ -18,7 +18,8 @@ func (s *MemoryStore) GetAlert(id string) (*model.Alert, error) {
 	if !ok {
 		return nil, ErrNotFound
 	}
-	return a, nil
+	cp := *a
+	return &cp, nil
 }
 
 func (s *MemoryStore) ListAlerts() []*model.Alert {
@@ -26,7 +27,8 @@ func (s *MemoryStore) ListAlerts() []*model.Alert {
 	defer s.mu.RUnlock()
 	list := make([]*model.Alert, 0, len(s.alerts))
 	for _, a := range s.alerts {
-		list = append(list, a)
+		cp := *a
+		list = append(list, &cp)
 	}
 	return list
 }
