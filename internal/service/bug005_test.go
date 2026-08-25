@@ -1,0 +1,3 @@
+package service
+import("testing";"ratelimiter/internal/config";"ratelimiter/internal/model";"ratelimiter/internal/store";"ratelimiter/pkg/logger")
+func TestBucketUpdateConflictKeepsStoredBucket(t *testing.T){s:=New(store.NewMemoryStore(),logger.NewLevel(logger.LevelError),&config.Config{MaxPageSize:100});a,_:=s.CreateBucket(model.Bucket{ClientID:"c",RuleID:"a",Tokens:2});b,_:=s.CreateBucket(model.Bucket{ClientID:"c",RuleID:"b",Tokens:4});_,e:=s.UpdateBucket(b.ID,model.Bucket{ClientID:"c",RuleID:"a",Tokens:99});if e==nil{t.Fatal("expected conflict")};got,_:=s.GetBucket(b.ID);if got.RuleID!="b"||got.Tokens!=4{t.Fatalf("conflict changed stored bucket: %#v",got)};_ = a}

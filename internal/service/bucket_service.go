@@ -67,14 +67,17 @@ func (s *Service) UpdateBucket(id string, input model.Bucket) (*model.Bucket, er
 	if err != nil {
 		return nil, err
 	}
-	existing.ClientID = input.ClientID
-	existing.RuleID = input.RuleID
-	existing.Tokens = input.Tokens
-	existing.UpdatedAt = time.Now().UTC()
-	if err := s.store.UpdateBucket(existing); err != nil {
+	// 在副本上组装新值，避免在 store 冲突校验通过前改动共享的已有记录。
+	// 否则冲突返回后，原桶的 RuleID/Tokens 等字段已被改掉。
+	updated := *existing
+	updated.ClientID = input.ClientID
+	updated.RuleID = input.RuleID
+	updated.Tokens = input.Tokens
+	updated.UpdatedAt = time.Now().UTC()
+	if err := s.store.UpdateBucket(&updated); err != nil {
 		return nil, err
 	}
-	return existing, nil
+	return &updated, nil
 }
 
 func (s *Service) DeleteBucket(id string) error {
