@@ -67,15 +67,18 @@ func (s *Service) UpdateClient(id string, input model.Client) (*model.Client, er
 	if err != nil {
 		return nil, err
 	}
-	existing.AppID = input.AppID
-	existing.Name = input.Name
-	existing.DailyQuota = input.DailyQuota
-	existing.Status = input.Status
-	existing.UpdatedAt = time.Now().UTC()
-	if err := s.store.UpdateClient(existing); err != nil {
+	// 在拷贝上应用改动：existing 直接指向 store 中的对象，若先改它再校验，
+	// 一旦 AppID 冲突返回 ErrConflict，原对象已被改脏，后续查询会读到半更新内容。
+	updated := *existing
+	updated.AppID = input.AppID
+	updated.Name = input.Name
+	updated.DailyQuota = input.DailyQuota
+	updated.Status = input.Status
+	updated.UpdatedAt = time.Now().UTC()
+	if err := s.store.UpdateClient(&updated); err != nil {
 		return nil, err
 	}
-	return existing, nil
+	return &updated, nil
 }
 
 func (s *Service) DeleteClient(id string) error {
