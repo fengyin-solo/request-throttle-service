@@ -64,16 +64,21 @@ func (s *Service) UpdateRule(id string, input model.Rule) (*model.Rule, error) {
 	if err != nil {
 		return nil, err
 	}
-	existing.Key = input.Key
-	existing.Algorithm = input.Algorithm
-	existing.Limit = input.Limit
-	existing.WindowSec = input.WindowSec
-	existing.Status = input.Status
-	existing.UpdatedAt = time.Now().UTC()
-	if err := s.store.UpdateRule(existing); err != nil {
+	// 构造副本再交给 store 校验，避免在冲突检查未通过前就原地改动存储中的原规则。
+	updated := &model.Rule{
+		ID:        existing.ID,
+		Key:       input.Key,
+		Algorithm: input.Algorithm,
+		Limit:     input.Limit,
+		WindowSec: input.WindowSec,
+		Status:    input.Status,
+		CreatedAt: existing.CreatedAt,
+		UpdatedAt: time.Now().UTC(),
+	}
+	if err := s.store.UpdateRule(updated); err != nil {
 		return nil, err
 	}
-	return existing, nil
+	return updated, nil
 }
 
 func (s *Service) DeleteRule(id string) error {

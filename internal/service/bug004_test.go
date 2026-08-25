@@ -1,0 +1,3 @@
+package service
+import("testing";"ratelimiter/internal/config";"ratelimiter/internal/model";"ratelimiter/internal/store";"ratelimiter/pkg/logger")
+func TestRuleUpdateConflictKeepsStoredRule(t *testing.T){s:=New(store.NewMemoryStore(),logger.NewLevel(logger.LevelError),&config.Config{MaxPageSize:100});a,_:=s.CreateRule(model.Rule{Key:"a",Algorithm:model.RuleAlgorithmFixedWindow,Limit:2,WindowSec:60});b,_:=s.CreateRule(model.Rule{Key:"b",Algorithm:model.RuleAlgorithmFixedWindow,Limit:2,WindowSec:60});_,e:=s.UpdateRule(b.ID,model.Rule{Key:"a",Algorithm:model.RuleAlgorithmFixedWindow,Limit:9,WindowSec:1});if e==nil{t.Fatal("expected conflict")};got,_:=s.GetRule(b.ID);if got.Key!="b"||got.Limit!=2{t.Fatalf("conflict changed stored rule: %#v",got)};_ = a}
